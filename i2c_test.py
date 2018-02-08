@@ -15,6 +15,7 @@ from machine import I2C, Pin
 import ujson as json
 from umqtt.simple import MQTTClient
 import network
+import ssd1306
 
 RESET_THR = 15000
 NEXT_THR = 7000
@@ -31,10 +32,14 @@ PROXREG = 0x87
 BINGO = False
 
 def main():
+    i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
+    initialise_OLED(i2c)
+    # oled.text('Connecting to network...', 0, 0)
+    # oled.show()
     print('Connecting to network...')
     initNetwork()
     #specify the pins for the i2c communnication with the peripherals and fequency used
-    i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
+
     client = setupClient()
     
     # wait until the user touches the proximity sensor
@@ -52,10 +57,8 @@ def main():
     while BINGO != True:
         proximity = read_prox(i2c)
         if (proximity > NEXT_THR):
-
-        # check from the server if there is a bingo
+            # check from the server if there is a bingo
             client.check_msg()
-            print(BINGO)
 
             if BINGO == False:
                 while True:
@@ -72,6 +75,7 @@ def main():
                     else:
                         results[sample-1] = sample    
                         ctr = ctr + 1
+                        print (sample)
                         json_string = {'Seed': str(light), 'Counter': str(ctr), 'Sample': str(sample)}
                         send_data(client,json_string)
                         json_string= sample
@@ -82,7 +86,10 @@ def main():
                     BINGO = True
 
                 time.sleep(1)
-    print('Game has ended. Press again to start a new one')
+    print('Game has ended. Long press to start a new one')
+    # time.sleep(2)
+    # if read_prox(i2c)>RESET_THR:
+
 
 def setupClient():
     client = MQTTClient(machine.unique_id(), '192.168.0.10') #New MQTT instance
@@ -164,6 +171,20 @@ def read_prox(i2c):
 def convert(bytes):
     (bytes,) = struct.unpack('>h', bytes)
     return bytes
+
+def initialise_OLED(i2c):
+    # Connect screen
+    oled = ssd1306.SSD1306_I2C(128, 64, i2c,0x3D)
+    oled.text('Eleos Pavlaki mou',0,0)
+    oled.show()
+    time.sleep(2)
+    # #Send reset
+    reset = machine.Pin(16, machine.Pin.OUT, None)
+    reset.value(0)
+    # #Wait for reset to complete
+    time.sleep_ms(200)
+    # #Turn off reset
+    reset.value(1)
 
 
 if __name__ == '__main__':
