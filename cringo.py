@@ -1,7 +1,8 @@
 """
 on-going:
-- add comments
-- look for optimisations
+    - comments
+    - possible optimisations
+    - LEDs addition
 """
 import machine
 import time
