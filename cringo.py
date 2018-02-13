@@ -14,7 +14,9 @@ import network
 import ssd1306      # library provided from micropython for the OLED Display
 
 RESET_THR = 15000   # Threshold of proximity sensor to reset the game
-NEXT_THR = 7000     # Threshold of proximity sensor to request new number
+NEXT_THR = 2100     # Threshold of proximity sensor to request new number
+FORW_THR = 7000     # Threshold of proximity sensor to move forward in the menu
+
 N = 7               # Number of bits of the generated number
 
 SLAVEADDR = 19      # Address of the sensor used by the i2c
@@ -141,8 +143,8 @@ def game_setup(i2c, oled):
     (light) = bootstrap(i2c,oled)   # Enables the proximity and ambient light sensors and returns a reading from the ambient light sensor
     random.seed(light)              # The ambient light reading is used as a random seed to initialise the generator
     oled.text('Seed: ' + str(light), 0,10)
-    oled.text('Touch to start',5,30)
-    oled.text('the game',25,40)
+    oled.text('Hover over ',25,30)
+    oled.text('sensor to start',5,40)
     oled.show()
     # time.sleep(2)    
     results = results_init()    # Array of 90 locations to accomodate the generated numbers
@@ -163,12 +165,11 @@ def bootstrap(i2c,oled):
     i2c.writeto_mem(SLAVEADDR,PROXIMITYPARAMETERS,b'\x04')
     # set ambient light sensor to continuous conversion mode taking 10 samples/s and averaging them
     i2c.writeto_mem(SLAVEADDR,LIGHTPARAMETERS,b'\xF7')
-    
+
     # take readings until someone touches the proximity sensor
     while start!=True:
         proximity = read_prox(i2c)
-        # print(proximity)
-        if proximity > NEXT_THR:
+        if proximity > FORW_THR:
             oled.fill(0)
             oled.text('Game starts...',0,0)
             oled.show()
@@ -205,10 +206,10 @@ def results_init():
 def bingo_game(i2c, client, light, ctr, results, oled):
     while BINGO != True:
         proximity = read_prox(i2c)  # Take a proximity reading
-        if (proximity > NEXT_THR):
-            # check from the server if there is a bingo
-            client.check_msg()
+        # check from the server if there is a bingo
+        client.check_msg()
 
+        if (proximity > NEXT_THR):
             if BINGO == False:
                 while True:
                     # generate a new random number
@@ -228,34 +229,33 @@ def bingo_game(i2c, client, light, ctr, results, oled):
                         oled.show()
                         json_string = {'Seed': str(light), 'Counter': str(ctr), 'Sample': str(sample)}  # Create the JSON message
                         send_data(client,json_string)   # Send the message to the server through the MQTT broker
-                        json_string= sample
-                        send_to_app(client,json_string)
+                        # json_string= sample
+                        # send_to_app(client,json_string)
                         break
 
                 time.sleep(1)
 
 def send_data(client,json_string): 
     data= json.dumps(json_string) # Converts the message into JSON format
-    client.publish('esys/cringo/samples/server', bytes(data, 'utf-8'))  # Sends data to broker
+    client.publish('esys/cringo/samples/publish', bytes(data, 'utf-8'))  # Sends data to broker
 
 def send_to_app(client,json_string):
     data= json.dumps(json_string) # Converts the message into JSON format
     client.publish('esys/cringo/samples/publish', bytes(data, 'utf-8'))# Send data to broker
 
 def read_ambient(i2c):
-    # request an ambient light measurement
+    # request an ambient light measurement from the 2 registers
     data = i2c.readfrom_mem(SLAVEADDR,LIGHTREG,2)
-    conv_data = convert(data)
+    # convert it into a 16-bit integer
+    conv_data = int.from_bytes(data,'big')
     return conv_data
 
 def read_prox(i2c):
+    # request a proximity measurement from the 2 registers
     data = i2c.readfrom_mem(SLAVEADDR,PROXREG,2)
-    conv_data = convert(data)   # might change it to int.from_bytes(data,'big')
+    # convert it into a 16-bit integer
+    conv_data = int.from_bytes(data,'big')
     return conv_data
-
-def convert(bytes):
-    (bytes,) = struct.unpack('>h', bytes)
-    return bytes
 
 def print_screen(oled):
     # flash BINGO!! when the game ends
