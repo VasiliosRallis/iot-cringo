@@ -1,7 +1,8 @@
 # embedded_cw1
 IOT coursework - Cringo device
 
--Cringo device is an IOT concept which emulates a classic game, Bingo.
+- Cringo device is an IOT concept which emulates a classic game, Bingo.
+
 -It uses an ambient light sensor to set the seed for the RNG and then generates a sequence of random numbers from 1 to 90 (included) on demand. Reading for the ambient light sensor, since it depends on the background light provides a true random seed for the generator hence produces a true random sequence, compared to the traditional seeding which generates pseudorandom sequences.
 -It provides a simple and intuitive user interface thanks to the proximity sensor which is used to detect if someone has his finger close or touching the sensor and for how long.
 -A short touch allows the user to move to the next state, while after the game finishes, a long touch of the sensor restarts the game.
