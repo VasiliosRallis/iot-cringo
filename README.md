@@ -27,8 +27,5 @@ in terms of software.
 - Buttons to connect and disconnect to the broker are also implemented, to enable the user to enter and exit the game at any time.
 - Further functionalities are to be implemented in newer versions of app.
 
-## Build Configuration
-This project was build on JDK 1.6
-
 ## License
 Copyrights 2018 included. In Chris We Trust Ltd.
