@@ -1,4 +1,9 @@
 # Embedded_coursework_1
+
+## Website
+
+The website creted for the coursework purposes advertising the concept product can be found [here](https://constantinosn1.wixsite.com/cringo).
+
 ## IOT coursework - Cringo device
 
 - Cringo device is an IOT concept which emulates a classic game, Bingo.
