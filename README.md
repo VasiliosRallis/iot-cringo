@@ -1,5 +1,5 @@
-# embedded_cw1
-IOT coursework - Cringo device
+# Embedded_coursework_1
+## IOT coursework - Cringo device
 
 - Cringo device is an IOT concept which emulates a classic game, Bingo.
 - It uses an ambient light sensor to set the seed for the RNG and then generates a sequence of random numbers
@@ -17,3 +17,18 @@ improve further the user experience.
 have a wifi connection.
 - Functionality is increased further by building and connecting the device to a custom tailored app, enabling it for future improvements
 in terms of software.
+
+## IOT coursework - Cringo App version 1.0
+
+- Cringo Android App is an android application which in combination with the cringo device replace the traditional game bingo.
+- Random numbers generated from the device are published to the MQTT broker. Our app subscribes to this topic in order to receive the published data.
+- In addition, our app provides a BINGO  button to send an identification that a bingo event occurs. The message is sent to a topic where our Cringo device subscribes.
+- All the message are encrypted to JSON format to ensure a safe and efficient transmission of data between app, broker and device.
+- Buttons to connect and disconnect to the broker are also implemented, to enable the user to enter and exit the game at any time.
+- Further functionalities are to be implemented in newer versions of app.
+
+## Build Configuration
+This project was build on JDK 1.6
+
+## License
+Copyrights 2018 included. In Chris We Trust Ltd.
